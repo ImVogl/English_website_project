@@ -17,11 +17,11 @@ def plural_substantive_setup(request):
 	if oft == 'oft_1':
 		singulars, plurals = plural_substantive_test(80, num)
 	if oft == 'oft_2':
-		singulars, plurals = plural_substantive_test(60, num)
-	if oft == 'oft_3':
 		singulars, plurals = plural_substantive_test(40, num)
+	if oft == 'oft_3':
+		singulars, plurals = plural_substantive_test(30, num)
 	if oft == 'oft_4':
-		singulars, plurals = plural_substantive_test(20, num)
+		singulars, plurals = plural_substantive_test(15, num)
 	else:
 		singulars, plurals = plural_substantive_test(0, num)
 
