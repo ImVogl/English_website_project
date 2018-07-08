@@ -1,6 +1,7 @@
 from random import randint
 import psycopg2
 
+# Число строчек в базеданных
 def getTableLen(tableName, dbName):
 	connect = psycopg2.connect(host = 'localhost', user = 'Some_user', password = '', dbname = dbName)
 	cursor = connect.cursor()
@@ -10,13 +11,14 @@ def getTableLen(tableName, dbName):
 	connect.close()
 	return result[0][0]
 
+# Изъятие неправильного глагола из таблицы
 def get_irr(oft):
 	connect = psycopg2.connect(host = 'localhost', user = 'Some_user', password = '', dbname = 'Testes_DB')
 	cursor = connect.cursor()
 	if oft == 'oft_1':
-		cursor.execute("""SELECT * FROM irregular_verbs WHERE frequency = %s;""", ( "group_1",))
+		cursor.execute("""SELECT * FROM irregular_verbs WHERE frequency = %s;""", ( "oft_1",))
 	elif oft == 'oft_2':
-		cursor.execute("""SELECT * FROM irregular_verbs WHERE frequency = %s AND frequency = %s;""", ( "group_1", "group_2", ))
+		cursor.execute("""SELECT * FROM irregular_verbs WHERE frequency = %s AND frequency = %s;""", ( "oft_1", "oft_2", ))
 	elif oft == 'oft_3':
 		cursor.execute("""SELECT * FROM irregular_verbs WHERE frequency != %s;""", ( "seldom", ))
 	elif oft == 'seldom':
@@ -28,6 +30,7 @@ def get_irr(oft):
 	connect.close()
 	return result[0:4]
 
+# Изятие предложений или текста, содержащий указанные неправильные глаголы
 def get_sentence(isRegular, verb):
 	connect = psycopg2.connect(host = 'localhost', user = 'Some_user', password = '', dbname = 'Testes_DB')
 	cursor = connect.cursor()
@@ -54,3 +57,34 @@ def get_sentence(isRegular, verb):
 		cursor.close()
 		connect.close()
 		return result[0], result[1][0]	# Возможно, тут нужно поправить (первый столбец - предложение, второй столбец - список кортеджей, которые содерат списки глаголов)
+
+# Изъятие случайного существительного
+def get_random_substantive(frequency, limit):
+	connect = psycopg2.connect(host = 'localhost', user = 'Some_user', password = '', dbname = 'Testes_DB')
+	cursor = connect.cursor()
+	cursor.execute("""SELECT substantive FROM substantives WHERE frequency > %s ORDER BY RANDOM() LIMIT %s;""", (frequency, limit, ))
+	result = cursor.fetchall()
+	cursor.close()
+	connect.close()
+	return result
+
+def get_verb_exact(type, verb):
+	connect = psycopg2.connect(host = 'localhost', user = 'Some_user', password = '', dbname = 'Testes_DB')
+	cursor = connect.cursor()
+	if type = 'irregular':
+		cursor.execute("""SELECT * FROM irregular_verbs WHERE infinitive = %s;""", ( verb,))
+	else:
+		cursor.execute("""SELECT * FROM regular_verbs WHERE infinitive = %s;""", ( verb,))
+	result = cursor.fetchall()
+	cursor.close()
+	connect.close()
+	return result
+
+def get_random_regular(limit):
+	connect = psycopg2.connect(host = 'localhost', user = 'Some_user', password = '', dbname = 'Testes_DB')
+	cursor = connect.cursor()
+	cursor.execute("""SELECT substantive FROM substantives ORDER BY RANDOM() LIMIT %s;""", (limit, ))
+	result = cursor.fetchall()
+	cursor.close()
+	connect.close()
+	return result

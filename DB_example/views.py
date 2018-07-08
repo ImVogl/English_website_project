@@ -5,7 +5,16 @@ from django.template import Context
 from django.shortcuts import render_to_response
 from .write_to_log import printLog
 from .data_base import get_userdata
-from testes.irregulat_verbs_test import test_ir, get_text, check_verbs
+from testes.Irregulat_verbs_test import irregular_verbs_setup, check_answers_irr
+from testes.Substantives_testes import plural_substantive_setup, check_answers_pl
+from testes.test_utilits import select_values
+from types.ContentClass import content
+
+# Глобальные переменные
+outValues = None
+iterator = 0
+length = 0
+content = content()
 
 
 # Test page
@@ -24,42 +33,59 @@ def index(request):
 		username = ""
 	return render(request, 'index.html', {'data_name': data_name})
 
-# Testing page (test_verbs.html)
-def send_to_page_verb(verbs, num):
-	input_index = ['rus', 'inf', 'simple', 'participle']
-	user_input = ['']*4
-	return render(request, 'test_verbs.html', {'group': VERBS[0]})	# Отправить нужно только часть глаголов в зависимости от
-	i = 0															# выбранной сложности VERBS[i][?] - один случайный/русский/руский и инфинитив
-	while (i < num) and request.method == "POST":
-		j = 0
-		for dat in input_index:
-			user_input[i] = request.POST.get(dat)
-			j += 1
-		check_v = check_verbs(user_input, VERBS[i])
-		i + = 1
-		return render(request, 'test_verbs.html', {'group': VERBS[i + 1]}) # Отправить нужно только часть глаголов в зависимости от выбранной сложности VERBS[i][?]
-	# Тест окнчен, нужно вывести результаты
-
 # Select test parameters page (test_verbs.html)
-def test(request):
-	if request.method == "POST":
-		type_test = "test"
-		oft = "oft_1"
-		num = 0
-		VERBS = []
-		type_test = request.POST.get('type_test')
-		oft = request.POST.get('oft')
-		num = int(request.POST.get('num'))
-		if oft == 'oft':
-			if num < 50:
-				oft = 'oft_1'
-			elif num > 80:
-				oft = 'oft_3'
-			else:
-				oft = 'oft_2'
-		VERBS = test_ir(oft, num)
-		if type_test == 'text':
-			sentences, verbs_from_table = get_text(VERBS, int(0.5*len(VERBS))) # verbs_from_table - нужна для проверки корректности ввода пользователем данных
-			return render(request, 'test_verbs.html', {'text': sentences})
+def test_page_function(request):
+	global content, outValues, iterator, length
+	
+	## Настройки тестов
+	# Настройки для тестирования глаголов
+	if request.method == "IRREGULAR_SETUP":
+		content.mainContent, content.supportContent, content.isText = irregular_verbs_setup(request)
+		if content.isText:
+			length = len(content.supportContent)
+			return render(request, 'test_page.html', {'text': content.mainContent})
 		else:
-			send_to_page_verb(VERBS, num)
+			length = len(content.mainContent)
+			outValues = request.POST.get('outValues')
+			return render(request, 'test_page.html', select_values(content.mainContent[0], outValues))
+
+	# Настройки для тестирования множественного числа существительных
+	if request.method == "PLURAL_SETUP":
+		content.mainContent, content.supportContent = plural_substantive_setup(request)
+		length = len(content.mainContent)
+		return render(request, 'test_verbs.html', {'singular': content.mainContent[0]})
+
+	## Проверка коррректности введеных пользователем значений
+	# Проверка глаголов
+	if request.method == "IRREGULAR_CHECK":
+		user_answer = {'rus':request.POST.get('rus'), 
+						'simple':request.POST.get('simple'), 
+						'past_simple':request.POST.get('past_simple'), 
+						'pass_participle':request.POST.get('pass_participle')}
+		
+		# Стоит учесть, что тут будет передан массив в масиве
+		answer_result = check_answers_irr(user_answer, content, outValues, iterator)
+		if not answer_result['simple'][0]:
+			content.incorrectValues.append(content.mainContent[iterator][1])
+
+		iterator += 1
+		if iterator < length:
+			return render(request, 'test_verbs.html', answer_result)
+		else:
+			return render(request, 'test_verbs.html', {'incorrectValues':content.incorrectValues})
+
+	# Проверка существительных
+	if request.method == "PLURAL_CHECK":
+		user_answer = {'singular':request.POST.get('singular'), 
+						'plural':request.POST.get('plural')}
+		
+		 # Стоит учесть, что тут будет передан массив в масиве
+		answer_result = check_answers_pl(user_answer, content, iterator)
+		if not answer_result['singular'][0]:
+			content.incorrectValues.append(content.mainContent[iterator])
+		
+		iterator +=1
+		if iterator < length:
+			return render(request, 'test_verbs.html', answer_result)
+		else:
+			return render(request, 'test_verbs.html', {'incorrectValues':content.incorrectValues})
