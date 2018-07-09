@@ -1,0 +1,19 @@
+#blockscreen, #modalwindow {
+    position: fixed;
+}
+#blockscreen {
+    background: rgba(0,0,255,0.2);
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 1;
+}
+#modalwindow {
+    z-index: 2;
+    background: rgba(0,255,0,0.5);
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #a1a1a1;
+    box-shadow: 0 0 10px #444;
+}
