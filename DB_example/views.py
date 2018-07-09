@@ -16,6 +16,8 @@ iterator = 0
 length = 0
 content = content()
 
+def set_global_variables():
+	return None, 0, 0, content()
 
 # Test page
 def index(request):
@@ -72,6 +74,7 @@ def test_page_function(request):
 		if iterator < length:
 			return render(request, 'test_verbs.html', answer_result)
 		else:
+			outValues, iterator, length, content = set_global_variables()
 			return render(request, 'test_verbs.html', {'incorrectValues':content.incorrectValues})
 
 	# Проверка существительных
@@ -88,4 +91,5 @@ def test_page_function(request):
 		if iterator < length:
 			return render(request, 'test_verbs.html', answer_result)
 		else:
+			outValues, iterator, length, content = set_global_variables()
 			return render(request, 'test_verbs.html', {'incorrectValues':content.incorrectValues})
