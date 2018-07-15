@@ -6,7 +6,7 @@ from random import shuffle
 
 # Choice 'num' random numbers from 'numb'
 def un_numbers(numb, num):
-	n = zeros(num)
+	n = zeros(num, dtype = int)
 	for i in range(num):
 		j = 0
 		while j < num:
@@ -49,7 +49,7 @@ def irregular_verbs_setup(request):
 	type_test = request.POST.get('type_test')
 	frequency = request.POST.get('oft')
 	num = int(request.POST.get('num'))
-	doesAddRegular = bool(request.POST.get('doesAddRegular'))
+	doesAddRegular = 'True' in request.POST.get('doesAddRegular')
 	if frequency == 'oft':
 		if num < 50:
 			oft = 'oft_1'
@@ -57,7 +57,7 @@ def irregular_verbs_setup(request):
 			oft = 'oft_3'
 		else:
 			oft = 'oft_2'
-	elif frequency == 'oft':
+	elif frequency == 'seldom':
 		oft = 'seldom'
 	else:
 		oft = ''
@@ -69,9 +69,9 @@ def irregular_verbs_setup(request):
 		if doesAddRegular:
 			verbs += get_random_regular(int(0.3*num))
 			shuffle(verbs)
-        return verbs, None, False
+		return verbs, None, False
 
-def check_answers(user_answer, content, outValues, iterator):
+def check_answers_irr(user_answer, content, outValues, iterator):
 	result = {}
 	keys = ['rus', 'simple', 'past_simple', 'pass_participle']
 
@@ -85,7 +85,7 @@ def check_answers(user_answer, content, outValues, iterator):
 			else:
 				result.keys[i] = False
 	else:
-        nextValues = select_values(content.mainContent[iterator + 1], outValues)
+		nextValues = select_values(content.mainContent[iterator + 1], outValues)
 		for i in range(4):
 			if content.mainContent[iterator][i] == user_answer[keys[i]]:
 				result.keys[i] = [True, nextValues[keys[i]]]

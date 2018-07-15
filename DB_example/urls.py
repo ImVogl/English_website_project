@@ -15,11 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.conf.urls import *
-from .views import index
+from .views import index, test_page_function
 
 admin.autodiscover()
 # from django.urls import path
 
 urlpatterns = 	[#url(r'^admin/', admin.site.urls), 
     			url(r'^index/', index),
+    			url(r'^tests/', test_page_function)
 			  ]

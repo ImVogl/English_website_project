@@ -6,7 +6,7 @@ import psycopg2
 def getTableLen(tableName, dbName):
 	try:
 		connect = psycopg2.connect(host = 'localhost', user = 'Some_user', password = '', dbname = dbName)
-	except Exception, error:
+	except psycopg2.Error as error:
 		write_to_log(['PostgreSQL connect error:', error.pgerror])
 		connect.close()
 		return 0
@@ -15,7 +15,7 @@ def getTableLen(tableName, dbName):
 	try:
 		cursor.execute("""SELECT COUNT(*) FROM %s;""", ( tableName, ))
 		result = cursor.fetchall()
-	except Exception, error:
+	except psycopg2.Error as error:
 		write_to_log(['PostgreSQL execute error:', error.pgerror])
 		return ['']*4
 	finally:
@@ -27,7 +27,7 @@ def getTableLen(tableName, dbName):
 def get_irr(oft):
 	try:
 		connect = psycopg2.connect(host = 'localhost', user = 'Some_user', password = '', dbname = 'Testes_DB')
-	except Exception, error:
+	except psycopg2.Error as error:
 		write_to_log(['PostgreSQL connect error:', error.pgerror])
 		connect.close()
 	
@@ -44,7 +44,7 @@ def get_irr(oft):
 		else:
 			cursor.execute("""SELECT * FROM irregular_verbs;""")
 		result = cursor.fetchall()
-	except Exception, error:
+	except psycopg2.Error as error:
 		write_to_log(['PostgreSQL execute error:', error.pgerror])
 		return ['']*4
 	finally:
@@ -85,7 +85,7 @@ def get_sentence(isRegular, verb):
 def get_random_substantive(frequency, limit):
 	try:
 		connect = psycopg2.connect(host = 'localhost', user = 'Some_user', password = '', dbname = 'Testes_DB')
-	except Exception, error:
+	except psycopg2.Error as error:
 		write_to_log(['PostgreSQL connect error:', error.pgerror])
 		connect.close()
 
@@ -94,7 +94,7 @@ def get_random_substantive(frequency, limit):
 		cursor.execute("""SELECT substantive FROM substantives WHERE frequency > %s ORDER BY RANDOM() LIMIT %s;""", (frequency, limit, ))
 		result = cursor.fetchall()
 
-	except Exception, error:
+	except psycopg2.Error as error:
 		write_to_log(['PostgreSQL execute error:', error.pgerror])
 		return ['']*4
 	finally:
@@ -105,18 +105,18 @@ def get_random_substantive(frequency, limit):
 def get_verb_exact(type, verb):
 	try:
 		connect = psycopg2.connect(host = 'localhost', user = 'Some_user', password = '', dbname = 'Testes_DB')
-	except Exception, error:
+	except psycopg2.Error as error:
 		write_to_log(['PostgreSQL connect error:', error.pgerror])
 		connect.close()
 
 	cursor = connect.cursor()
 	try:
-		if type = 'irregular':
+		if type == 'irregular':
 			cursor.execute("""SELECT * FROM irregular_verbs WHERE infinitive = %s;""", ( verb,))
 		else:
 			cursor.execute("""SELECT * FROM regular_verbs WHERE infinitive = %s;""", ( verb,))
 		result = cursor.fetchall()
-	except Exception, error:
+	except psycopg2.Error as error:
 		write_to_log(['PostgreSQL execute error:', error.pgerror])
 		return ['']*4
 	finally:
@@ -127,7 +127,7 @@ def get_verb_exact(type, verb):
 def get_random_regular(limit):
 	try:
 		connect = psycopg2.connect(host = 'localhost', user = 'Some_user', password = '', dbname = 'Testes_DB')
-	except Exception, error:
+	except psycopg2.Error as error:
 		write_to_log(['PostgreSQL connect error:', error.pgerror])
 		connect.close()
 
@@ -135,7 +135,7 @@ def get_random_regular(limit):
 	try:
 		cursor.execute("""SELECT substantive FROM substantives ORDER BY RANDOM() LIMIT %s;""", (limit, ))
 		result = cursor.fetchall()
-	except Exception, error:
+	except psycopg2.Error as error:
 		write_to_log(['PostgreSQL execute error:', error.pgerror])
 		return ['']*4
 	finally:

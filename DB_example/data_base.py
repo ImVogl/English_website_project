@@ -1,5 +1,5 @@
 import psycopg2
-from .write_to_log import printLog
+from logs.LogProccessing import write_to_log
 from datetime import date, datetime
 
 def get_userdata(num):

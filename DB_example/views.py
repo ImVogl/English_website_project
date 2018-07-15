@@ -1,14 +1,16 @@
+import os
+
 from django.shortcuts import render
 from django.http.response import HttpResponse
 from django.template.loader import get_template
 from django.template import Context
 from django.shortcuts import render_to_response
-from .write_to_log import printLog
-from .data_base import get_userdata
-from testes.Irregulat_verbs_test import irregular_verbs_setup, check_answers_irr
+from logs.LogProccessing import write_to_log
+from DB_example.data_base import get_userdata
+from testes.Irregular_verbs_test import irregular_verbs_setup, check_answers_irr
 from testes.Substantives_testes import plural_substantive_setup, check_answers_pl
 from testes.test_utilits import select_values
-from types.ContentClass import content
+from ContentClass import content
 
 # Глобальные переменные
 outValues = None
@@ -35,31 +37,38 @@ def index(request):
 		username = ""
 	return render(request, 'index.html', {'data_name': data_name})
 
-# Select test parameters page (test_verbs.html)
+# Select test parameters page (test_modal_window.html)
 def test_page_function(request):
 	global content, outValues, iterator, length
 	
+	# Если метод иной, то ничего не возвращаем
+	if request.method != "POST":
+		# Default request returned
+		return render(request, 'tests\\test_modal_window.html', {})
+
+	requestTypeList = list(request.POST.keys())
+
 	## Настройки тестов
 	# Настройки для тестирования глаголов
-	if request.method == "IRREGULAR_SETUP":
+	if "IRREGULAR_SETUP" in requestTypeList:
 		content.mainContent, content.supportContent, content.isText = irregular_verbs_setup(request)
 		if content.isText:
 			length = len(content.supportContent)
-			return render(request, 'test_page.html', {'text': content.mainContent})
+			return render(request, 'tests\\test_modal_window.html', {'text': content.mainContent})
 		else:
 			length = len(content.mainContent)
 			outValues = request.POST.get('outValues')
-			return render(request, 'test_page.html', select_values(content.mainContent[0], outValues))
+			return render(request, 'tests\\test_modal_window.html', select_values(content.mainContent[0], outValues))
 
 	# Настройки для тестирования множественного числа существительных
-	if request.method == "PLURAL_SETUP":
+	if "PLURAL_SETUP" in requestTypeList:
 		content.mainContent, content.supportContent = plural_substantive_setup(request)
 		length = len(content.mainContent)
-		return render(request, 'test_verbs.html', {'singular': content.mainContent[0]})
+		return render(request, 'tests\\test_modal_window.html', {'singular': content.mainContent[0]})
 
 	## Проверка коррректности введеных пользователем значений
 	# Проверка глаголов
-	if request.method == "IRREGULAR_CHECK":
+	if "IRREGULAR_CHECK" in requestTypeList:
 		user_answer = {'rus':request.POST.get('rus'), 
 						'simple':request.POST.get('simple'), 
 						'past_simple':request.POST.get('past_simple'), 
@@ -72,13 +81,13 @@ def test_page_function(request):
 
 		iterator += 1
 		if iterator < length:
-			return render(request, 'test_verbs.html', answer_result)
+			return render(request, 'tests\\test_modal_window.html', answer_result)
 		else:
 			outValues, iterator, length, content = set_global_variables()
-			return render(request, 'test_verbs.html', {'incorrectValues':content.incorrectValues})
+			return render(request, 'tests\\test_modal_window.html', {'incorrectValues':content.incorrectValues})
 
 	# Проверка существительных
-	if request.method == "PLURAL_CHECK":
+	if "PLURAL_CHECK" in requestTypeList:
 		user_answer = {'singular':request.POST.get('singular'), 
 						'plural':request.POST.get('plural')}
 		
@@ -89,7 +98,7 @@ def test_page_function(request):
 		
 		iterator +=1
 		if iterator < length:
-			return render(request, 'test_verbs.html', answer_result)
+			return render(request, 'tests\\test_modal_window.html', answer_result)
 		else:
 			outValues, iterator, length, content = set_global_variables()
-			return render(request, 'test_verbs.html', {'incorrectValues':content.incorrectValues})
+			return render(request, 'tests\\test_modal_window.html', {'incorrectValues':content.incorrectValues})

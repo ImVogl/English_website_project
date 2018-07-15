@@ -1,4 +1,4 @@
-from test_db import get_random_substantive
+from .tests_db import get_random_substantive
 from inflect import engine
 
 def plural_substantive_test(frequency, num):
