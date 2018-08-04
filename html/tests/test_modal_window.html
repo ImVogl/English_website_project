@@ -2,18 +2,24 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <link href="IrregularVerbsTestStyle.css" type="text/css" 
-        rel="stylesheet">
-        <script src="modalWindow.js"></script>
+        <link href="IrregularVerbsTestStyle.css" type="text/css" rel="stylesheet">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="modalWindows.js"></script>
     </head>
     <body>
-        <button onclick="modalWindow.show(550, '&lt;form method=&quot;IRREGULAR_SETUP&quot; \
-                        action=&quot;*тут должен быть адрес обрабатывающей проги*&quot; name=&quot;Form&quot;&gt; &lt;b&gt;Настроки теста&lt;/b&gt;&lt;Br&gt; \
-                        &lt;input type=&quot;checkbox&quot;name=&quot;doesAddRegular&quot;value=&quot;True&quot;&gt;Подмешать правильные глаголы?&lt;Br&gt; \
-                        &lt;input type=&quot;radio&quot; name=&quot;type_test&quot;value=&quot;simpleRus&quot;&gt;Русский + simple&lt;Br&gt; \
-                        &lt;input type=&quot;radio&quot; name=&quot;type_test&quot;value=&quot;simple&quot;&gt;Simple&lt;Br&gt; \
-                        &lt;input type=&quot;radio&quot; name=&quot;type_test&quot;value=&quot;random&quot;&gt;Случайная форма&lt;Br&gt; \
-                        &lt;input type=&quot;radio&quot; name=&quot;type_test&quot;value=&quot;text&quot;&gt;Текст &lt;p&gt; \
-                        &lt;input type=&quot;submit&quot; value=&quot;Оk&quot;&gt;&lt;/p&gt; &lt;/form&gt;')">*тут должно быть мини окошко*</button>
-    </body>
+        <input type=image src="IrregularVerbs.png" id="test_settings" onclick = "modalWindow.show(550, '&lt;form method=&quot;IRREGULAR_SETUP&quot; \
+                            id=&quot;test_options&quot;action=&quot;&quot; name=&quot;Form&quot;&gt; &lt;b&gt;Настроки теста&lt;/b&gt;&lt;Br&gt; \
+                            &lt;input type=&quot;checkbox&quot;name=&quot;doesAddRegular&quot;value=&quot;True&quot;&gt;Подмешать правильные глаголы?&lt;Br&gt; \
+                            &lt;input type=&quot;radio&quot; name=&quot;type_test&quot;value=&quot;simpleRus&quot;&gt;Русский + simple&lt;Br&gt; \
+                            &lt;input type=&quot;radio&quot; name=&quot;type_test&quot;value=&quot;simple&quot;&gt;Simple&lt;Br&gt; \
+                            &lt;input type=&quot;radio&quot; name=&quot;type_test&quot;value=&quot;random&quot;&gt;Случайная форма&lt;Br&gt; \
+                            &lt;input type=&quot;radio&quot; name=&quot;type_test&quot;value=&quot;text&quot;&gt;Текст &lt;p&gt; \
+                            &lt;input type=&quot;button&quot; value=&quot;Оk&quot;&gt;&lt;/p&gt; &lt;/form&gt;',' \
+                            &lt;form method=&quot;POST&quot; id=&quot;test_form&quot; name=&quot;Form_test&quot; action=&quot;&quot;&gt;&lt;p&gt;&quot;Описание теста&quot;&lt;/p&gt; \
+                            &lt;p&gt;Russian translation&lt;/p&gt;&lt;input type=&quot;text&quot; value=&quot;{{rus.0}}&quot;&gt; &lt;p&gt; \
+                            Infinitive&lt;/p&gt;&lt;input type=&quot;text&quot; value=&quot;{{simple.1}}&quot;&gt;&lt;p&gt; \
+                            Past Simple&lt;/p&gt;&lt;input type=&quot;text&quot; value=&quot;{{past_simple.0}}&quot;&gt;&lt;p&gt; \
+                            Past Participle&lt;/p&gt;&lt;input type=&quot;text&quot; value=&quot;{{pass_participle.1}}&quot;&gt;&lt;p&gt; \
+                            &lt;input type=&quot;button&quot; value=&quot;Следующий вопрос&quot; name =&quot;IRREGULAR_SETUP&quot; id=&quot;btn&quot;&gt;')">
+        </body>
 </html>
