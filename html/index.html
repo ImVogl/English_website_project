@@ -1,3 +1,16 @@
+<!--
+  https://stackoverflow.com/questions/13183630/how-to-open-a-bootstrap-modal-window-using-jquery
+  http://blog.nemikor.com/2009/04/18/loading-a-page-into-a-dialog/
+  http://qaru.site/questions/92102/jquery-load-modal-dialog-contents-via-ajax
+  https://api.jquery.com/jquery.getjson/
+  https://ru.stackoverflow.com/questions/523966/Вызов-ajax-в-модальном-окне-вызванном-при-помощи-ajax
+  http://anton.shevchuk.name/javascript/jquery-for-beginners-ajax/
+  https://drupalfly.ru/station/vyvod-kontenta-v-modalnoe-okno-cerez-ajax-modul-ajaxcontent
+  https://developer.mozilla.org/ru/docs/Web/API/XMLHttpRequest
+  https://learn.javascript.ru/ajax-xmlhttprequest
+  http://qaru.site/questions/34532/403-forbidden-error-when-making-an-ajax-post-request-in-django-framework
+-->
+<!--
 <html>
    <head>
       <meta charset="utf-8" />
@@ -19,4 +32,139 @@
       <hr>
       <h1> Имя из базы данных: {{ data_name }}</h1>
    </body>
+</html>
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <title>Tests</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <!-- Trigger the modal with a button -->
+    <form id="test_options" class="form-wizard">{% csrf_token %}
+        <h2 class="form-wizard-heading"> Окно с тестами </h2>
+            <input type="button" value = "Открыть окно" id="StartSetupButton" onclick="OpenSetupForIrregularTest()"/>
+        </form>
+
+
+  <!-- Setup modal window -->
+  <div class="modal fade" id="SetupModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Настроки теста</h4>
+        </div>
+        <div class="modal-body">
+            <input type = "checkbox" name = "doesAddRegular" value = "True"> Подмешать правильные глаголы?<Br>
+            <input type = "radio" name = "type_test" value = "simpleRus"> Русский + simple<Br>
+            <input type = "radio" name = "type_test" value = "simple"> Simple<Br>
+            <input type = "radio" name = "type_test" value= "random"> Случайная форма<Br>
+            <input type = "radio" name = "type_test" value = "text"> Текст
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" id="StartTestButton" onclick="IrregularTestSetupOk()" data-dismiss="modal">Ок</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  
+<!-- Main modal window -->
+
+<div class="modal fade" id="TestModal" role="dialog">
+    <div class="modal-dialog">
+
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Введите ответ и нажмите далее</h4>
+        </div>
+        <div class="modal-body">
+            <label> Русский: </label>
+            <input type = "text" id = "IrregularTestRusId" value = ""> <Br>
+            <label> Simple: </label>
+            <input type = "text" id = "IrregularTestSimpleId" value = ""> <Br>
+            <label> Past simple: </label>
+            <input type = "text" id = "IrregularTestPastSimpleId" value = ""> <Br>
+            <label> Past participle: </label>
+            <input type = "text" id = "IrregularTestPastParticipleId" value = "">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" id="NextTestButton" data-dismiss="modal">Далее</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+</div>
+
+<script>
+
+// функция отправки форны на сервер и получения данных
+function sendAjaxForm(form_id, url, content) 
+{
+  var resultJson;
+  $.ajax({
+    type: "POST",
+    url: url,
+    dataType: "json",
+    data: content,
+    success: function(someObject, textStatus, response)
+    {
+      sendIntoDocument(response.responseJSON);
+    }
+  });
+}
+
+function IrregularTestNext(inputJson)
+{
+  var url = "http://127.0.0.1:8000/index/";
+  var content =  {csrfmiddlewaretoken: "{{ csrf_token }}",  content: "Birds" };
+  // console.log(inputJson);
+  /*
+  */
+  // resultJson = sendAjaxForm("#TestModal", url, content);
+  // $("#NextTestButton").click(IrregularTestNext(resultJson));
+}
+
+function sendIntoDocument(inputJson)
+{
+  document.getElementById("IrregularTestRusId").value = inputJson["data"];
+  document.getElementById("IrregularTestSimpleId").value = inputJson["data"];
+  document.getElementById("IrregularTestPastSimpleId").value = inputJson["data"];
+  document.getElementById("IrregularTestPastParticipleId").value = inputJson["data"];
+}
+
+// Открытие модального окна с настройками
+function OpenSetupForIrregularTest()
+{
+  $("#SetupModal").modal();
+}
+
+// Оправка настроек серверу и открытие другого модального окна
+function IrregularTestSetupOk()
+{
+  var url = "http://127.0.0.1:8000/index/";
+  var content =  {csrfmiddlewaretoken: "{{ csrf_token }}",  content: "Birds" };
+  var resultJson;
+  $("#TestModal").modal();
+  resultJson = sendAjaxForm("#TestModal", url, content);
+  IrregularTestNext(resultJson);
+}
+
+</script>
+
+</body>
 </html>
