@@ -30,20 +30,22 @@ def get_irr(oft):
 	except psycopg2.Error as error:
 		write_to_log(['PostgreSQL connect error:', error.pgerror])
 		connect.close()
-	
+
 	cursor = connect.cursor()
 	try:
 		if oft == 'oft_1':
 			cursor.execute("""SELECT * FROM irregular_verbs WHERE frequency = %s;""", ( "oft_1",))
 		elif oft == 'oft_2':
-			cursor.execute("""SELECT * FROM irregular_verbs WHERE frequency = %s AND frequency = %s;""", ( "oft_1", "oft_2", ))
+			cursor.execute("""SELECT * FROM irregular_verbs WHERE frequency = %s OR frequency = %s;""", ( "oft_1", "oft_2", ))
 		elif oft == 'oft_3':
 			cursor.execute("""SELECT * FROM irregular_verbs WHERE frequency <> %s;""", ( "seldom", ))
 		elif oft == 'seldom':
 			cursor.execute("""SELECT * FROM irregular_verbs WHERE frequency = %s;""", ( "seldom", ))
 		else:
 			cursor.execute("""SELECT * FROM irregular_verbs;""")
+
 		result = cursor.fetchall()
+
 	except psycopg2.Error as error:
 		write_to_log(['PostgreSQL execute error:', error.pgerror])
 		return ['']*4
@@ -51,7 +53,7 @@ def get_irr(oft):
 		cursor.close()
 		connect.close()
 
-	return result[0:4]
+	return result
 
 # Изятие предложений или текста, содержащий указанные неправильные глаголы
 def get_sentence(isRegular, verb):

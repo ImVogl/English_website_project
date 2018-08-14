@@ -41,15 +41,15 @@ def test_ir(oft, num):
 	shuffle(numbers)
 	result = []
 	for i in range(num):
-		result.append(verbs[numbers[i]])
+		result.append(verbs[numbers[i]][0:4])
 	return result
 
 # Получение итогового списка глаголов 
 def irregular_verbs_setup(request):
-	type_test = request.POST.get('type_test')
-	frequency = request.POST.get('oft')
-	num = int(request.POST.get('num'))
-	doesAddRegular = 'True' in request.POST.get('doesAddRegular')
+	frequency = request.POST.get('content[IRREGULAR_SETUP][frequency]')
+	num = int(request.POST.get('content[IRREGULAR_SETUP][num]'))
+
+	doesAddRegular = 'True' in request.POST.get('content[IRREGULAR_SETUP][doesAddRegular]')
 	if frequency == 'oft':
 		if num < 50:
 			oft = 'oft_1'
@@ -59,10 +59,11 @@ def irregular_verbs_setup(request):
 			oft = 'oft_2'
 	elif frequency == 'seldom':
 		oft = 'seldom'
-	else:
+	elif frequency == 'all' or frequency == 'text':
 		oft = ''
+
 	verbs = test_ir(oft, num)
-	if type_test == 'text':
+	if frequency == 'text':
 		sentences, verbs_from_table = get_text(verbs, int(0.5*len(verbs))) # verbs_from_table - нужна для проверки корректности ввода пользователем данных
 		return sentences, verbs_from_table, True
 	else:
@@ -74,22 +75,21 @@ def irregular_verbs_setup(request):
 def check_answers_irr(user_answer, content, outValues, iterator):
 	result = {}
 	keys = ['rus', 'simple', 'past_simple', 'pass_participle']
-
 	if content.isText:
 		if not bool(content.supportContent.count(user_answer['simple'])):
 			return {'rus':[False, None], 'simple':[False, None], 'past_simple':[False, None], 'pass_participle':[False, None]}
 		verbs = get_verb_exact('irregular', user_answer['simple'])
 		for i in range(4):
 			if verbs[i] == user_answer[keys[i]]:
-				result.keys[i] = True
+				result[keys[i]] = True
 			else:
-				result.keys[i] = False
+				result[keys[i]] = False
 	else:
 		nextValues = select_values(content.mainContent[iterator + 1], outValues)
 		for i in range(4):
 			if content.mainContent[iterator][i] == user_answer[keys[i]]:
-				result.keys[i] = [True, nextValues[keys[i]]]
+				result[keys[i]] = [True, nextValues[keys[i]]]
 			else:
-				result.keys[i] = [False, nextValues[keys[i]]]
+				result[keys[i]] = [False, nextValues[keys[i]]]
 
 	return result

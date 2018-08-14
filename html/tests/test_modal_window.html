@@ -1,25 +1,275 @@
+<!--
+  https://stackoverflow.com/questions/13183630/how-to-open-a-bootstrap-modal-window-using-jquery
+  http://blog.nemikor.com/2009/04/18/loading-a-page-into-a-dialog/
+  http://qaru.site/questions/92102/jquery-load-modal-dialog-contents-via-ajax
+  https://api.jquery.com/jquery.getjson/
+  https://ru.stackoverflow.com/questions/523966/Вызов-ajax-в-модальном-окне-вызванном-при-помощи-ajax
+  http://anton.shevchuk.name/javascript/jquery-for-beginners-ajax/
+  https://drupalfly.ru/station/vyvod-kontenta-v-modalnoe-okno-cerez-ajax-modul-ajaxcontent
+  https://developer.mozilla.org/ru/docs/Web/API/XMLHttpRequest
+  https://learn.javascript.ru/ajax-xmlhttprequest
+  http://qaru.site/questions/34532/403-forbidden-error-when-making-an-ajax-post-request-in-django-framework
+
+  http://htmlbook.ru/html/input
+  http://htmlbook.ru/samhtml5/formy/polzunok
+  http://htmlbook.ru/html/label
+  http://htmlbook.ru/html/select
+  http://htmlbook.ru/html/attr/common
+  http://htmlbook.ru/html/attr/event
+  http://htmlbook.ru/html/attr/onfocus
+  http://htmlbook.ru/samhtml5/formy/polzunok
+
+    Sleep:  https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep
+-->
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <link href="IrregularVerbsTestStyle.css" type="text/css" rel="stylesheet">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <script src="modalWindows.js"></script>
-    </head>
-    <body>
-        <input type=image src="IrregularVerbs.png" id="test_settings" onclick = "modalWindow.show(550, '&lt;form method=&quot;IRREGULAR_SETUP&quot; \
-                            id=&quot;test_options&quot;action=&quot;&quot; name=&quot;Form&quot;&gt; &lt;b&gt;Настроки теста&lt;/b&gt;&lt;Br&gt; \
-                            &lt;input type=&quot;checkbox&quot;name=&quot;doesAddRegular&quot;value=&quot;True&quot;&gt;Подмешать правильные глаголы?&lt;Br&gt; \
-                            &lt;input type=&quot;radio&quot; name=&quot;type_test&quot;value=&quot;simpleRus&quot;&gt;Русский + simple&lt;Br&gt; \
-                            &lt;input type=&quot;radio&quot; name=&quot;type_test&quot;value=&quot;simple&quot;&gt;Simple&lt;Br&gt; \
-                            &lt;input type=&quot;radio&quot; name=&quot;type_test&quot;value=&quot;random&quot;&gt;Случайная форма&lt;Br&gt; \
-                            &lt;input type=&quot;radio&quot; name=&quot;type_test&quot;value=&quot;text&quot;&gt;Текст &lt;p&gt; \
-                            &lt;input type=&quot;button&quot; value=&quot;Оk&quot;&gt;&lt;/p&gt; &lt;/form&gt;',' \
-                            &lt;form method=&quot;POST&quot; id=&quot;test_form&quot; name=&quot;Form_test&quot; action=&quot;&quot;&gt;&lt;p&gt;&quot;Описание теста&quot;&lt;/p&gt; \
-                            &lt;p&gt;Russian translation&lt;/p&gt;&lt;input type=&quot;text&quot; value=&quot;{{rus.0}}&quot;&gt; &lt;p&gt; \
-                            Infinitive&lt;/p&gt;&lt;input type=&quot;text&quot; value=&quot;{{simple.1}}&quot;&gt;&lt;p&gt; \
-                            Past Simple&lt;/p&gt;&lt;input type=&quot;text&quot; value=&quot;{{past_simple.0}}&quot;&gt;&lt;p&gt; \
-                            Past Participle&lt;/p&gt;&lt;input type=&quot;text&quot; value=&quot;{{pass_participle.1}}&quot;&gt;&lt;p&gt; \
-                            &lt;input type=&quot;button&quot; value=&quot;Следующий вопрос&quot; name =&quot;IRREGULAR_SETUP&quot; id=&quot;btn&quot;&gt;')">
-        </body>
+<html lang="ru">
+<head>
+  <title>Tests</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <!-- Trigger the modal with a button -->
+    <form id="test_options" class="form-wizard">{% csrf_token %}
+        <h2 class="form-wizard-heading"> Окно с тестами </h2>
+        <input type = "button" value = "Открыть окно" id = "StartSetupButton" onclick = "OpenSetupForIrregularTest()" />
+    </form>
+
+  <!-- Setup modal window -->
+  <div class="modal fade" id="SetupModal" role="dialog">
+    <div class="modal-dialog">
+
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Настроки теста</h4>
+        </div>
+        <div class="modal-body">
+            <input type = "radio" name = "type_test" id = "simpleRus" checked="checked"> Русский + simple
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <!-- не смог найти тег с табами или настройкой положения-->
+            <select size="1" name="oft" onchange = "DisableAddRegular(); SetBoundaryValues(); SetCaptureForRange();">
+                <option id="oft" selected = "selected">Часто используемые глаголы</option>
+                <option id="seldom">Редко используемые глаголы</option>
+                <option id="all">Все глаголы</option>
+                <option id="text">Текст</option>
+            </select><Br>
+            <input type = "radio" name = "type_test" id = "simple"> Simple<Br>
+            <input type = "radio" name = "type_test" id= "random"> Случайная форма<Br><Br>
+            <input type = "checkbox" name = "doesAddRegular" id = "doesAddRegular" > Подмешать правильные глаголы?<Br>
+            <p id = "rangeCapture">Число неправильных глаголов: 50</p>
+            <input type="range" min="25" max="101" step="1" value="50" id = "numberOfVerbs" oninput = "SetCaptureForRange()">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" id="StartTestButton" onclick="IrregularTestSetupOk()" data-dismiss="modal">Ок</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+<!-- Main modal window -->
+
+<div class="modal fade" id="TestModal" role="dialog">
+    <div class="modal-dialog">
+
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Введите ответ и нажмите далее</h4>
+        </div>
+        <div class="modal-body">
+            <label> Русский: </label>
+            <input type = "text" id = "IrregularTestRusId" value = ""><Br>
+            <label> Simple: </label>
+            <input type = "text" id = "IrregularTestSimpleId" value = ""> <Br>
+            <label> Past simple: </label>
+            <input type = "text" id = "IrregularTestPastSimpleId" value = ""> <Br>
+            <label> Past participle: </label>
+            <input type = "text" id = "IrregularTestPastParticipleId" value = "">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" id="NextTestButton" onclick="IrregularTestNext()" data-dismiss="modal">Далее</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+
+// Отключение радиобаттана к текстом
+function DisableAddRegular()
+{
+    if(document.getElementById("text").selected){
+        if(document.getElementById("doesAddRegular").checked){
+            document.getElementById("doesAddRegular").checked = false;
+        }
+        document.getElementById("doesAddRegular").disabled = true;
+    }
+    else{
+        document.getElementById("doesAddRegular").disabled = false;
+    }
+}
+
+// Установка максимального и минимального заначения для ползунка в настройках теста
+function SetBoundaryValues()
+{
+    if(document.getElementById("oft").selected){
+        document.getElementById("numberOfVerbs").min = 25;
+        document.getElementById("numberOfVerbs").max = 101;
+        document.getElementById("numberOfVerbs").value = 63;
+    }
+    if(document.getElementById("seldom").selected){
+        document.getElementById("numberOfVerbs").min = 10;
+        document.getElementById("numberOfVerbs").max = 43;
+        document.getElementById("numberOfVerbs").value = 26;
+    }
+    if(document.getElementById("all").selected){
+        document.getElementById("numberOfVerbs").min = 35;
+        document.getElementById("numberOfVerbs").max = 144;
+        document.getElementById("numberOfVerbs").value = 90;
+    }
+    if(document.getElementById("text").selected){
+        document.getElementById("numberOfVerbs").min = 10;
+        document.getElementById("numberOfVerbs").max = 40;
+        document.getElementById("numberOfVerbs").value = 25;
+    }
+}
+
+// Установка граничных значений для ползунка
+function SetCaptureForRange()
+{
+    if(document.getElementById("text").selected){
+        document.getElementById("rangeCapture").innerHTML = "Число предложений с неправильными глаголами: " + document.getElementById("numberOfVerbs").value
+    }
+    else{
+        document.getElementById("rangeCapture").innerHTML = "Число неправильных глаголов: " + document.getElementById("numberOfVerbs").value
+    }
+}
+
+// Установка результатов ответа пользователя
+function SetResultValues(inputJson, oldJson)
+{
+
+    var keys = [ "rus", "simple", "past_simple", "pass_participle" ];
+    var ids = [ "IrregularTestRusId", "IrregularTestSimpleId", "IrregularTestPastSimpleId", "IrregularTestPastParticipleId" ];
+
+    for(var i = 0; i < 4; i++){
+        if(inputJson[keys[i]][0]){
+            document.getElementById(ids[i]).style.color = '#0F0';
+        }
+        else{
+            document.getElementById(ids[i]).style = "color: #F00; text-decoration: line-through";
+        }
+        document.getElementById(ids[i]).value = oldJson[keys[i]];
+    }
+}
+
+// Функция паузы
+function sleep (time) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
+
+// Функция, вызываемая при нажатии кнопки "Далее"
+function IrregularTestNext()
+{
+    var url = "http://127.0.0.1:8000/tests/";
+    var content =  { csrfmiddlewaretoken: "{{ csrf_token }}", content: { IRREGULAR_CHECK: {
+                    rus: document.getElementById("IrregularTestRusId").value,
+                    simple: document.getElementById("IrregularTestSimpleId").value,
+                    past_simple: document.getElementById("IrregularTestPastSimpleId").value,
+                    pass_participle: document.getElementById("IrregularTestPastParticipleId").value
+                    } } };
+
+    var ajaxObject = $.ajax({type: "POST", url: url, dataType: "json", data: content});
+
+    ajaxObject.done(function() { $('#TestModal').modal() });
+    ajaxObject.done(function(request) { SetResultValues(request, content["content"]["IRREGULAR_CHECK"]); });
+    sleep(3500).then(() => { ajaxObject.done(function(request) { SetNewVerbs(request); }) });
+}
+
+// Установка новых глаголов в поля ввода
+function SetNewVerbs(inputJson)
+{
+    var keys = [ "rus", "simple", "past_simple", "pass_participle" ];
+    var ids = [ "IrregularTestRusId", "IrregularTestSimpleId", "IrregularTestPastSimpleId", "IrregularTestPastParticipleId" ];
+
+    for(var i = 0; i < 4; i++){
+        document.getElementById(ids[i]).style = 'color: #000000; text-decoration: none';
+        document.getElementById(ids[i]).value = inputJson[keys[i]][1];
+    }
+}
+
+// Вставка в текстовые поля значений из базы данных
+function SetVerbsIntoDocument(inputJson)
+{
+    document.getElementById("IrregularTestRusId").value = inputJson["rus"];
+    document.getElementById("IrregularTestSimpleId").value = inputJson["simple"];
+    document.getElementById("IrregularTestPastSimpleId").value = inputJson["past_simple"];
+    document.getElementById("IrregularTestPastParticipleId").value = inputJson["pass_participle"];
+}
+
+// Открытие модального окна с настройками
+function OpenSetupForIrregularTest()
+{
+  $("#SetupModal").modal();
+}
+
+// функция отправки форны на сервер и получения данных
+function SendAjaxFormSetup(form_id, url, content) 
+{
+    $.ajax({
+        type: "POST",
+        url: url,
+        dataType: "json",
+        data: content,
+        success: function(someObject, textStatus, response)
+        {
+            SetVerbsIntoDocument(response.responseJSON);
+        },
+        error: (error) => { console.log(JSON.stringify(error)); }
+    });
+}
+
+// Оправка настроек серверу и открытие другого модального окна
+function IrregularTestSetupOk()
+{
+    var url = "http://127.0.0.1:8000/tests/";
+    var radiobuttons = [ "simpleRus", "simple", "random" ];
+    var frequencyList = [ "oft", "seldom", "all", "text"]
+
+    var i = 0;
+    while (!document.getElementById(radiobuttons[i]).checked){
+        i++;
+    }
+    var radiobutton = radiobuttons[i++];
+
+    var i = 0;
+    while (!document.getElementById(frequencyList[i]).selected){
+        i++;
+    }
+    var frequencyVal = frequencyList[i++];
+
+    if(document.getElementById("doesAddRegular").checked){
+        var content =  { csrfmiddlewaretoken: "{{ csrf_token }}",  content: { IRREGULAR_SETUP: { outValues: radiobutton, num: document.getElementById("numberOfVerbs").value, frequency:  frequencyVal, doesAddRegular: "True" } } };
+    }
+    else{
+        var content =  { csrfmiddlewaretoken: "{{ csrf_token }}",  content: { IRREGULAR_SETUP: { outValues: radiobutton, num: document.getElementById("numberOfVerbs").value, frequency:  frequencyVal, doesAddRegular: "False" } } };
+    }
+    $("#TestModal").modal();
+    SendAjaxFormSetup("#TestModal", url, content);
+}
+
+</script>
+
+</body>
 </html>
